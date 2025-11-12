@@ -1,40 +1,22 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"strings"
+
+	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
-type Point struct {
-	r, c int
+type Day11 struct {
+	grid     *common.Grid
+	galaxies []common.Point
 }
 
-type Grid struct {
-	width, height int
-	matrix        [][]string
-	galaxies      []Point
+func (d *Day11) Year() string {
+	return "2023"
 }
 
-func NewGrid(matrix [][]string) *Grid {
-	height := len(matrix)
-	width := len(matrix[0])
-
-	var galaxies []Point
-	for r := 0; r < height; r++ {
-		for c := 0; c < width; c++ {
-			if matrix[r][c] == "#" {
-				galaxies = append(galaxies, Point{r, c})
-			}
-		}
-	}
-
-	return &Grid{
-		matrix:   matrix,
-		width:    width,
-		height:   height,
-		galaxies: galaxies,
-	}
+func (d *Day11) Day() string {
+	return "11"
 }
 
 func makeNullRow(width int) []string {
@@ -45,7 +27,7 @@ func makeNullRow(width int) []string {
 	return row
 }
 
-func readInput(input string) *Grid {
+func (d *Day11) Parse(input string) error {
 	var ss [][]string
 	for _, line := range strings.Split(input, "\n") {
 		line = strings.TrimSpace(line)
@@ -63,26 +45,16 @@ func readInput(input string) *Grid {
 
 	// Check Rows
 	nullRows := make(map[int]bool)
-loop1:
+	nullCols := make(map[int]bool)
+	var galaxies []common.Point
 	for r := 0; r < h; r++ {
 		for c := 0; c < w; c++ {
 			if ss[r][c] == "#" {
-				continue loop1
+				nullRows[r] = true
+				nullCols[c] = true
+				galaxies = append(galaxies, common.PointFromRC(r, c))
 			}
 		}
-		nullRows[r] = true
-	}
-
-	// Check Cols
-	nullCols := make(map[int]bool)
-loop2:
-	for c := 0; c < w; c++ {
-		for r := 0; r < h; r++ {
-			if ss[r][c] == "#" {
-				continue loop2
-			}
-		}
-		nullCols[c] = true
 	}
 
 	newWidth := w + len(nullCols)*2
@@ -104,104 +76,39 @@ loop2:
 		matrix = append(matrix, row)
 	}
 
-	grid := NewGrid(matrix)
-	return grid
+	d.galaxies = galaxies
+	d.grid = nil // TODO: Fix this
+
+	return nil
 }
 
-func (grid *Grid) Size() (int, int) {
-	return grid.width, grid.height
-}
-
-func (grid *Grid) Dump() {
-	w, h := grid.Size()
-	for r := 0; r < h; r++ {
-		for c := 0; c < w; c++ {
-			fmt.Print(grid.matrix[r][c])
-		}
-		fmt.Println()
-	}
-}
-
-func mag(i int) int {
-	switch {
-	case i > 0:
-		return 1
-	case i < 0:
-		return -1
-	default:
-		return 0
-	}
-}
-
-func abs(i int) int {
-	switch {
-	case i > 0:
-		return i
-	case i < 0:
-		return i * -1
-	default:
-		return 0
-	}
-}
-
-func shortestPathSize(from, to Point) int {
+func shortestPathSize(from, to common.Point) int {
 	res := 0
 	current := from
 	for current != to {
 		res++
-		dr := to.r - current.r
-		dc := to.c - current.c
-		if abs(dr) > abs(dc) {
-			current = Point{current.r + mag(dr), current.c}
+		dr := to.R() - current.R()
+		dc := to.C() - current.C()
+		if common.Abs(dr) > common.Abs(dc) {
+			current = common.PointFromRC(current.R()+common.Mag(dr), current.C())
 		} else {
-			current = Point{current.r, current.c + mag(dc)}
+			current = common.PointFromRC(current.R(), current.C()+common.Mag(dc))
 		}
 	}
 	return res
 }
 
-func part1(input string) int {
-	grid := readInput(input)
-	// grid.Dump()
+func (d *Day11) Part1() any {
 	sum := 0
-	for i := 0; i < len(grid.galaxies)-1; i++ {
-		for j := i + 1; j < len(grid.galaxies); j++ {
-			a, b := grid.galaxies[i], grid.galaxies[j]
+	for i := 0; i < len(d.galaxies)-1; i++ {
+		for j := i + 1; j < len(d.galaxies); j++ {
+			a, b := d.galaxies[i], d.galaxies[j]
 			sum += shortestPathSize(a, b)
 		}
 	}
 	return sum
 }
 
-func part2(input string) int {
+func (d *Day11) Part2() any {
 	return 0
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `...#......
-	.......#..
-	#.........
-	..........
-	......#...
-	.#........
-	.........#
-	..........
-	.......#..
-	#...#.....`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 11, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 11, Part 2: %v\n", part2(input))
 }

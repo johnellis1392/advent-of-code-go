@@ -1,9 +1,10 @@
 package aoc2023
 
 import (
-	"fmt"
 	"math"
 	"strings"
+
+	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
 type Day10 struct {
@@ -36,51 +37,27 @@ func (d *Day10) Parse(input string) error {
 	return nil
 }
 
-type Point struct {
-	r, c int
-}
-
-func (p Point) String() string {
-	return fmt.Sprintf("(%d, %d)", p.r, p.c)
-}
-
-func (p Point) West() Point {
-	return Point{p.r, p.c - 1}
-}
-
-func (p Point) East() Point {
-	return Point{p.r, p.c + 1}
-}
-
-func (p Point) North() Point {
-	return Point{p.r - 1, p.c}
-}
-
-func (p Point) South() Point {
-	return Point{p.r + 1, p.c}
-}
-
 type Grid struct {
 	width, height int
 	matrix        [][]string
 	steps         [][]int
-	start         Point
+	start         common.Point
 }
 
 func (g *Grid) Size() (int, int) {
 	return g.width, g.height
 }
 
-func (g *Grid) SetStep(p Point, i int) {
-	g.steps[p.r][p.c] = i
+func (g *Grid) SetStep(p common.Point, i int) {
+	g.steps[p.R()][p.C()] = i
 }
 
-func (g *Grid) GetStep(p Point) int {
-	return g.steps[p.r][p.c]
+func (g *Grid) GetStep(p common.Point) int {
+	return g.steps[p.R()][p.C()]
 }
 
-func (g *Grid) Get(p Point) string {
-	return g.matrix[p.r][p.c]
+func (g *Grid) Get(p common.Point) string {
+	return g.matrix[p.R()][p.C()]
 }
 
 func (g *Grid) Reset() {
@@ -94,19 +71,19 @@ func (g *Grid) Reset() {
 	g.SetStep(g.start, 0)
 }
 
-func (g *Grid) Valid(p Point) bool {
+func (g *Grid) Valid(p common.Point) bool {
 	width, height := g.Size()
-	return 0 <= p.r && p.r < height && 0 <= p.c && p.c < width
+	return 0 <= p.R() && p.R() < height && 0 <= p.C() && p.C() < width
 }
 
-func (g *Grid) GetConnectedWalls(p Point) []Point {
-	var res []Point
-	r, c := p.r, p.c
+func (g *Grid) GetConnectedWalls(p common.Point) []common.Point {
+	var res []common.Point
+	r, c := p.R(), p.C()
 
-	up := Point{r - 1, c}
-	down := Point{r + 1, c}
-	left := Point{r, c - 1}
-	right := Point{r, c + 1}
+	up := common.PointFromRC(r-1, c)
+	down := common.PointFromRC(r+1, c)
+	left := common.PointFromRC(r, c-1)
+	right := common.PointFromRC(r, c+1)
 
 	switch g.Get(p) {
 	case "S":
@@ -189,29 +166,29 @@ func (g *Grid) GetConnectedWalls(p Point) []Point {
 	return res
 }
 
-func (g *Grid) FewerSteps(from, to Point) bool {
+func (g *Grid) FewerSteps(from, to common.Point) bool {
 	return g.GetStep(from)+1 < g.GetStep(to)
 }
 
-func (g *Grid) Step(from, to Point) {
+func (g *Grid) Step(from, to common.Point) {
 	g.SetStep(to, g.GetStep(from)+1)
 }
 
-func (g *Grid) Adjacents(p Point) []Point {
-	var res []Point
-	up := Point{p.r - 1, p.c}
+func (g *Grid) Adjacents(p common.Point) []common.Point {
+	var res []common.Point
+	up := common.PointFromRC(p.R()-1, p.C())
 	if g.Valid(up) {
 		res = append(res, up)
 	}
-	down := Point{p.r + 1, p.c}
+	down := common.PointFromRC(p.R()+1, p.C())
 	if g.Valid(down) {
 		res = append(res, down)
 	}
-	left := Point{p.r, p.c - 1}
+	left := common.PointFromRC(p.R(), p.C()-1)
 	if g.Valid(left) {
 		res = append(res, left)
 	}
-	right := Point{p.r, p.c + 1}
+	right := common.PointFromRC(p.R(), p.C()+1)
 	if g.Valid(right) {
 		res = append(res, right)
 	}
@@ -221,13 +198,13 @@ func (g *Grid) Adjacents(p Point) []Point {
 func NewGrid(matrix [][]string) *Grid {
 	height, width := len(matrix), len(matrix[0])
 	steps := make([][]int, height)
-	var start Point
+	var start common.Point
 
 outer:
 	for r := 0; r < height; r++ {
 		for c := 0; c < width; c++ {
 			if matrix[r][c] == "S" {
-				start = Point{r, c}
+				start = common.PointFromRC(r, c)
 				break outer
 			}
 		}
@@ -245,14 +222,14 @@ outer:
 }
 
 type Queue struct {
-	vs []Point
+	vs []common.Point
 }
 
-func (q *Queue) Enqueue(p Point) {
+func (q *Queue) Enqueue(p common.Point) {
 	q.vs = append(q.vs, p)
 }
 
-func (q *Queue) Pop() Point {
+func (q *Queue) Pop() common.Point {
 	v := q.vs[0]
 	q.vs = q.vs[1:]
 	return v
@@ -263,40 +240,40 @@ func (q *Queue) Empty() bool {
 }
 
 func NewQueue() *Queue {
-	return &Queue{[]Point{}}
+	return &Queue{[]common.Point{}}
 }
 
 type Set struct {
-	vs map[Point]bool
+	vs map[common.Point]bool
 }
 
 func NewSet() *Set {
-	return &Set{make(map[Point]bool)}
+	return &Set{make(map[common.Point]bool)}
 }
 
-func (s *Set) First() Point {
+func (s *Set) First() common.Point {
 	for p := range s.vs {
 		return p
 	}
-	return Point{-1, -1}
+	return common.PointFromRC(-1, -1)
 }
 
-func (s *Set) Add(p Point) {
+func (s *Set) Add(p common.Point) {
 	s.vs[p] = true
 }
 
-func (s *Set) Remove(p Point) {
+func (s *Set) Remove(p common.Point) {
 	delete(s.vs, p)
 }
 
-func (s *Set) Contains(p Point) bool {
+func (s *Set) Contains(p common.Point) bool {
 	_, ok := s.vs[p]
 	return ok
 }
 
 func (s *Set) Diff(o *Set) (res *Set) {
 	res = NewSet()
-	s.ForEach(func(p Point) {
+	s.ForEach(func(p common.Point) {
 		if !o.Contains(p) {
 			res.Add(p)
 		}
@@ -306,10 +283,10 @@ func (s *Set) Diff(o *Set) (res *Set) {
 
 func (s *Set) Union(o *Set) (res *Set) {
 	res = NewSet()
-	s.ForEach(func(p Point) {
+	s.ForEach(func(p common.Point) {
 		res.Add(p)
 	})
-	o.ForEach(func(p Point) {
+	o.ForEach(func(p common.Point) {
 		res.Add(p)
 	})
 	return res
@@ -317,12 +294,12 @@ func (s *Set) Union(o *Set) (res *Set) {
 
 func (s *Set) Xor(o *Set) (res *Set) {
 	res = NewSet()
-	s.ForEach(func(p Point) {
+	s.ForEach(func(p common.Point) {
 		if !o.Contains(p) {
 			res.Add(p)
 		}
 	})
-	o.ForEach(func(p Point) {
+	o.ForEach(func(p common.Point) {
 		if !s.Contains(p) {
 			res.Add(p)
 		}
@@ -332,7 +309,7 @@ func (s *Set) Xor(o *Set) (res *Set) {
 
 func (s *Set) Intersect(o *Set) (res *Set) {
 	res = NewSet()
-	s.ForEach(func(p Point) {
+	s.ForEach(func(p common.Point) {
 		if o.Contains(p) {
 			res.Add(p)
 		}
@@ -348,7 +325,7 @@ func (s *Set) Overlaps(o *Set) bool {
 	return s.Intersect(o).Size() > 0
 }
 
-func (s *Set) ForEach(f func(p Point)) {
+func (s *Set) ForEach(f func(p common.Point)) {
 	for p := range s.vs {
 		f(p)
 	}
@@ -397,7 +374,7 @@ func getTiles(grid *Grid, walls *Set) *Set {
 	tiles := NewSet()
 	for r := 0; r < h; r++ {
 		for c := 0; c < w; c++ {
-			p := Point{r, c}
+			p := common.PointFromRC(r, c)
 			if !walls.Contains(p) {
 				tiles.Add(p)
 			}
@@ -406,16 +383,16 @@ func getTiles(grid *Grid, walls *Set) *Set {
 	return tiles
 }
 
-func contained(grid *Grid, walls *Set, p Point) bool {
+func contained(grid *Grid, walls *Set, p common.Point) bool {
 	res := 0
 
 	_, h := grid.Size()
-	r := p.r
+	r := p.R()
 	for ; r < h; r++ {
-		if !walls.Contains(Point{r, p.c}) {
+		if !walls.Contains(common.PointFromRC(r, p.C())) {
 			continue
 		}
-		s := grid.Get(Point{r, p.c})
+		s := grid.Get(common.PointFromRC(r, p.C()))
 		switch s {
 		case "-":
 			res++
@@ -423,7 +400,7 @@ func contained(grid *Grid, walls *Set, p Point) bool {
 			res++
 			r++
 			for ; r < h; r++ {
-				s2 := grid.Get(Point{r, p.c})
+				s2 := grid.Get(common.PointFromRC(r, p.C()))
 				if s2 == "J" {
 					break
 				} else if s2 == "L" {
@@ -435,7 +412,7 @@ func contained(grid *Grid, walls *Set, p Point) bool {
 			res++
 			r++
 			for ; r < h; r++ {
-				s2 := grid.Get(Point{r, p.c})
+				s2 := grid.Get(common.PointFromRC(r, p.C()))
 				if s2 == "L" {
 					break
 				} else if s2 == "J" {
@@ -454,7 +431,7 @@ func replaceStart(grid *Grid) {
 	ps := grid.GetConnectedWalls(p)
 	a, b := ps[0], ps[1]
 
-	eq := func(q1, q2 Point) bool {
+	eq := func(q1, q2 common.Point) bool {
 		return a == q1 && b == q2 || b == q2 && a == q1
 	}
 
@@ -473,7 +450,7 @@ func replaceStart(grid *Grid) {
 	case eq(p.South(), p.West()):
 		s = "7"
 	}
-	grid.matrix[p.r][p.c] = s
+	grid.matrix[p.R()][p.C()] = s
 }
 
 func (d *Day10) Part2() any {
@@ -484,7 +461,7 @@ func (d *Day10) Part2() any {
 
 	sum := 0
 	containedPoints := NewSet()
-	tiles.ForEach(func(p Point) {
+	tiles.ForEach(func(p common.Point) {
 		if contained(grid, walls, p) {
 			sum++
 			containedPoints.Add(p)
