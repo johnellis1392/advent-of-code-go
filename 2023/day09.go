@@ -1,13 +1,23 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-func readInput(input string) [][]int {
+type Day09 struct {
+	input [][]int
+}
+
+func (d *Day09) Year() string {
+	return "2023"
+}
+
+func (d *Day09) Day() string {
+	return "09"
+}
+
+func (d *Day09) Parse(input string) error {
 	var result [][]int
 	for _, line := range strings.Split(input, "\n") {
 		line = strings.TrimSpace(line)
@@ -21,19 +31,9 @@ func readInput(input string) [][]int {
 		}
 		result = append(result, ns)
 	}
-	return result
-}
+	d.input = result
 
-func dump(sequences [][]int) {
-	for _, row := range sequences {
-		for i, v := range row {
-			if i != 0 {
-				fmt.Printf(" ")
-			}
-			fmt.Printf("%d", v)
-		}
-		fmt.Println()
-	}
+	return nil
 }
 
 func zeroes(sequence []int) bool {
@@ -66,8 +66,8 @@ func predict(sequence []int) int {
 	return last(sequence) + next
 }
 
-func part1(input string) int {
-	sequences := readInput(input)
+func (d *Day09) Part1() any {
+	sequences := d.input
 	sum := 0
 	for _, sequence := range sequences {
 		sum += predict(sequence)
@@ -84,33 +84,11 @@ func predictBackwards(sequence []int) int {
 	return sequence[0] - prev
 }
 
-func part2(input string) int {
-	sequences := readInput(input)
+func (d *Day09) Part2() any {
+	sequences := d.input
 	sum := 0
 	for _, sequence := range sequences {
 		sum += predictBackwards(sequence)
 	}
 	return sum
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `0 3 6 9 12 15
-	1 3 6 10 15 21
-	10 13 16 21 30 45`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 9, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 9, Part 2: %v\n", part2(input))
 }

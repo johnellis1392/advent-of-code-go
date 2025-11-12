@@ -1,12 +1,67 @@
-package main
+package aoc2023
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
+
+type Day05 struct {
+	seeds      []int
+	sourceMaps []SourceMap
+}
+
+func (d *Day05) Year() string {
+	return "2023"
+}
+
+func (d *Day05) Day() string {
+	return "05"
+}
+
+func (d *Day05) Parse(input string) error {
+	lines := strings.Split(input, "\n")
+	i := 0
+	var seeds []int
+	for _, seed := range strings.Split(strings.TrimPrefix(lines[i], "seeds: "), " ") {
+		n, _ := strconv.Atoi(seed)
+		seeds = append(seeds, n)
+	}
+	i += 2
+
+	var sourceMaps []SourceMap
+	for i < len(lines) {
+		var line string
+		line = strings.TrimSpace(lines[i])
+		i++
+		header := strings.TrimSuffix(line, " map:")
+		parts := strings.Split(header, "-")
+		sourceType := parts[0]
+		destType := parts[2]
+
+		var ranges []RangeMap
+		line = strings.TrimSpace(lines[i])
+		i++
+		for i < len(lines) && len(line) > 0 {
+			parts = strings.Split(line, " ")
+			destStart, _ := strconv.Atoi(parts[0])
+			sourceStart, _ := strconv.Atoi(parts[1])
+			size, _ := strconv.Atoi(parts[2])
+			ranges = append(ranges, RangeMap{sourceStart, destStart, size})
+
+			line = strings.TrimSpace(lines[i])
+			i++
+		}
+
+		sourceMaps = append(sourceMaps, SourceMap{sourceType, destType, ranges})
+	}
+
+	d.seeds = seeds
+	d.sourceMaps = sourceMaps
+
+	return nil
+}
 
 type Range struct {
 	start int
@@ -138,55 +193,8 @@ func (s SourceMap) Transform(n int) int {
 	}
 }
 
-func readInput(input string) ([]int, []SourceMap) {
-	lines := strings.Split(input, "\n")
-	i := 0
-	var seeds []int
-	for _, seed := range strings.Split(strings.TrimPrefix(lines[i], "seeds: "), " ") {
-		n, _ := strconv.Atoi(seed)
-		seeds = append(seeds, n)
-	}
-	i += 2
-
-	var sourceMaps []SourceMap
-	for i < len(lines) {
-		var line string
-		line = strings.TrimSpace(lines[i])
-		i++
-		header := strings.TrimSuffix(line, " map:")
-		parts := strings.Split(header, "-")
-		sourceType := parts[0]
-		destType := parts[2]
-
-		var ranges []RangeMap
-		line = strings.TrimSpace(lines[i])
-		i++
-		for i < len(lines) && len(line) > 0 {
-			parts = strings.Split(line, " ")
-			destStart, _ := strconv.Atoi(parts[0])
-			sourceStart, _ := strconv.Atoi(parts[1])
-			size, _ := strconv.Atoi(parts[2])
-			ranges = append(ranges, RangeMap{sourceStart, destStart, size})
-
-			line = strings.TrimSpace(lines[i])
-			i++
-		}
-
-		sourceMaps = append(sourceMaps, SourceMap{sourceType, destType, ranges})
-	}
-
-	return seeds, sourceMaps
-}
-
-func dump(seeds []int, sourceMaps []SourceMap) {
-	fmt.Println(seeds)
-	for _, s := range sourceMaps {
-		fmt.Println(s.String())
-	}
-}
-
-func part1(input string) int {
-	seeds, sourceMaps := readInput(input)
+func (d *Day05) Part1() any {
+	seeds, sourceMaps := d.seeds, d.sourceMaps
 	for _, sourceMap := range sourceMaps {
 		for i := 0; i < len(seeds); i++ {
 			seeds[i] = sourceMap.Transform(seeds[i])
@@ -231,7 +239,6 @@ func transformSeeds(sourceMaps []SourceMap, seedChan, outputChan chan int) {
 	for seed, ok := <-seedChan; ok; seed, ok = <-seedChan {
 		go func(seed int) {
 			s := seed
-			// fmt.Printf("Transforming Seed: %d\n", s)
 			for _, sm := range sourceMaps {
 				s = sm.Transform(s)
 			}
@@ -254,8 +261,8 @@ func aggregateSeeds(outputChan, resultChan chan int) {
 }
 
 // Succeeds, but takes on the order of 15 minutes+ to run
-func part2_concurrent(input string) int {
-	seedRanges, sourceMaps := readInput(input)
+func (d *Day05) Part2() any {
+	seedRanges, sourceMaps := d.seeds, d.sourceMaps
 
 	seedChan := make(chan int)
 	go genSeeds(seedRanges, seedChan)
@@ -292,56 +299,3 @@ func part2_concurrent(input string) int {
 
 // 	return res
 // }
-
-func main() {
-	const DEBUG = true
-	filename := "input.txt"
-	test_input := `seeds: 79 14 55 13
-
-	seed-to-soil map:
-	50 98 2
-	52 50 48
-	
-	soil-to-fertilizer map:
-	0 15 37
-	37 52 2
-	39 0 15
-	
-	fertilizer-to-water map:
-	49 53 8
-	0 11 42
-	42 0 7
-	57 7 4
-	
-	water-to-light map:
-	88 18 7
-	18 25 70
-	
-	light-to-temperature map:
-	45 77 23
-	81 45 19
-	68 64 13
-	
-	temperature-to-humidity map:
-	0 69 1
-	1 0 69
-	
-	humidity-to-location map:
-	60 56 37
-	56 93 4
-	`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 5, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 5, Part 2: %v\n", part2_concurrent(input))
-}

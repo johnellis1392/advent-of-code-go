@@ -1,12 +1,27 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"strings"
 )
 
-func part1(input string) int {
+type Day02 struct {
+	input string
+}
+
+func (d *Day02) Year() string {
+	return "2022"
+}
+
+func (d *Day02) Day() string {
+	return "02"
+}
+
+func (d *Day02) Parse(input string) error {
+	d.input = strings.TrimSpace(input)
+	return nil
+}
+
+func (d *Day02) Part1() any {
 	win_score := 6
 	draw_score := 3
 	lose_score := 0
@@ -15,7 +30,7 @@ func part1(input string) int {
 	scissor_score := 3
 
 	sum := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		switch line {
 		case "A X":
@@ -42,7 +57,7 @@ func part1(input string) int {
 	return sum
 }
 
-func part2(input string) int {
+func (d *Day02) Part2() any {
 	win_score := 6
 	draw_score := 3
 	lose_score := 0
@@ -52,7 +67,7 @@ func part2(input string) int {
 
 	sum := 0
 
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		switch line {
 		case "A X":
@@ -77,24 +92,4 @@ func part2(input string) int {
 	}
 
 	return sum
-}
-
-func main() {
-	filename := "input.txt"
-	const DEBUG = false
-	var input string
-	if DEBUG {
-		input = `A Y
-		B X
-		C Z`
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 2, part 1: %v\n", part1(input))
-	fmt.Printf("2022 Day 2, part 2: %v\n", part2(input))
 }

@@ -1,11 +1,28 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
 	"math"
-	"os"
 	"strings"
+
+	common "github.com/johnellis1392/advent-of-code-go/common"
 )
+
+type Day12 struct {
+	input string
+}
+
+func (d *Day12) Year() string {
+	return "2022"
+}
+
+func (d *Day12) Day() string {
+	return "12"
+}
+
+func (d *Day12) Parse(input string) error {
+	d.input = input
+	return nil
+}
 
 func abs(i int) int {
 	if i < 0 {
@@ -19,15 +36,11 @@ func height(c byte) int {
 	return int(c - 'a')
 }
 
-type Point struct {
-	r, c int
-}
-
 type Grid struct {
 	matrix           [][]string
 	heightMap        [][]int
 	steps            [][]int
-	start, end       Point
+	start, end       common.Point
 	numRows, numCols int
 }
 
@@ -36,7 +49,7 @@ func NewGrid(input [][]byte) *Grid {
 	matrix := make([][]string, m)
 	heightMap := make([][]int, m)
 	steps := make([][]int, m)
-	var start, end Point
+	var start, end common.Point
 
 	for r := 0; r < m; r++ {
 		matrix[r] = make([]string, n)
@@ -45,13 +58,14 @@ func NewGrid(input [][]byte) *Grid {
 		for c := 0; c < n; c++ {
 			matrix[r][c] = string(input[r][c])
 			steps[r][c] = math.MaxInt
-			if input[r][c] == 'S' {
+			switch input[r][c] {
+			case 'S':
 				heightMap[r][c] = height('a')
-				start = Point{r, c}
-			} else if input[r][c] == 'E' {
+				start = common.PointFromRC(r, c)
+			case 'E':
 				heightMap[r][c] = height('z')
-				end = Point{r, c}
-			} else {
+				end = common.PointFromRC(r, c)
+			default:
 				heightMap[r][c] = height(input[r][c])
 			}
 		}
@@ -68,8 +82,8 @@ func NewGrid(input [][]byte) *Grid {
 	}
 }
 
-func (g *Grid) Get(p Point) (string, int) {
-	return g.matrix[p.r][p.c], g.heightMap[p.r][p.c]
+func (g *Grid) Get(p common.Point) (string, int) {
+	return g.matrix[p.R()][p.C()], g.heightMap[p.R()][p.C()]
 }
 
 func (g *Grid) Size() (int, int) {
@@ -85,38 +99,38 @@ func (g *Grid) Reset() {
 	}
 }
 
-func (g *Grid) StartingPoints() []Point {
-	var res []Point
+func (g *Grid) StartingPoints() []common.Point {
+	var res []common.Point
 	m, n := g.Size()
 	for r := 0; r < m; r++ {
 		for c := 0; c < n; c++ {
 			if g.matrix[r][c] == "a" {
-				res = append(res, Point{r, c})
+				res = append(res, common.PointFromRC(r, c))
 			}
 		}
 	}
 	return res
 }
 
-func (g *Grid) Adjacents(p Point) []Point {
-	var adjacents []Point
+func (g *Grid) Adjacents(p common.Point) []common.Point {
+	var adjacents []common.Point
 	numRows, numCols := g.Size()
-	if p.r-1 >= 0 {
-		adjacents = append(adjacents, Point{p.r - 1, p.c})
+	if p.R()-1 >= 0 {
+		adjacents = append(adjacents, common.PointFromRC(p.R()-1, p.C()))
 	}
-	if p.r+1 < numRows {
-		adjacents = append(adjacents, Point{p.r + 1, p.c})
+	if p.R()+1 < numRows {
+		adjacents = append(adjacents, common.PointFromRC(p.R()+1, p.C()))
 	}
-	if p.c-1 >= 0 {
-		adjacents = append(adjacents, Point{p.r, p.c - 1})
+	if p.C()-1 >= 0 {
+		adjacents = append(adjacents, common.PointFromRC(p.R(), p.C()-1))
 	}
-	if p.c+1 < numCols {
-		adjacents = append(adjacents, Point{p.r, p.c + 1})
+	if p.C()+1 < numCols {
+		adjacents = append(adjacents, common.PointFromRC(p.R(), p.C()+1))
 	}
 	return adjacents
 }
 
-func (g *Grid) Moveable(from, to Point) bool {
+func (g *Grid) Moveable(from, to common.Point) bool {
 	_, h1 := g.Get(from)
 	_, h2 := g.Get(to)
 	if h2 <= h1 || h2-h1 == 1 {
@@ -126,7 +140,7 @@ func (g *Grid) Moveable(from, to Point) bool {
 	}
 }
 
-func (g *Grid) FewerSteps(from, to Point) bool {
+func (g *Grid) FewerSteps(from, to common.Point) bool {
 	s1 := g.GetStep(from)
 	s2 := g.GetStep(to)
 	if s1+1 < s2 {
@@ -136,15 +150,15 @@ func (g *Grid) FewerSteps(from, to Point) bool {
 	}
 }
 
-func (g *Grid) GetStep(p Point) int {
-	return g.steps[p.r][p.c]
+func (g *Grid) GetStep(p common.Point) int {
+	return g.steps[p.R()][p.C()]
 }
 
-func (g *Grid) SetStep(p Point, i int) {
-	g.steps[p.r][p.c] = i
+func (g *Grid) SetStep(p common.Point, i int) {
+	g.steps[p.R()][p.C()] = i
 }
 
-func (g *Grid) Step(from, to Point) {
+func (g *Grid) Step(from, to common.Point) {
 	g.SetStep(to, g.GetStep(from)+1)
 }
 
@@ -164,90 +178,19 @@ func readInput(input string) *Grid {
 	return NewGrid(res)
 }
 
-func dumpMatrix(grid *Grid) {
-	m, n := grid.Size()
-	for r := 0; r < m; r++ {
-		for c := 0; c < n; c++ {
-			fmt.Printf("%v", grid.matrix[r][c])
-		}
-		fmt.Println()
-	}
-}
-
-func dumpHeightMap(grid *Grid) {
-	m, n := grid.Size()
-	for r := 0; r < m; r++ {
-		for c := 0; c < n; c++ {
-			if c != 0 {
-				fmt.Printf(" ")
-			}
-			fmt.Printf("%2d", grid.heightMap[r][c])
-		}
-		fmt.Println()
-	}
-}
-
-func dumpSteps(grid *Grid) {
-	m, n := grid.Size()
-	for r := 0; r < m; r++ {
-		for c := 0; c < n; c++ {
-			if c != 0 {
-				fmt.Printf(" ")
-			}
-			v := grid.steps[r][c]
-			if v == math.MaxInt {
-				v = -1
-			}
-			fmt.Printf("%2d", v)
-		}
-		fmt.Println()
-	}
-}
-
-func dumpByLetter(grid *Grid, s string) {
-	m, n := grid.Size()
-	for r := 0; r < m; r++ {
-		for c := 0; c < n; c++ {
-			if c != 0 {
-				fmt.Printf(" ")
-			}
-			str, _ := grid.Get(Point{r, c})
-			if str == s {
-				step := grid.GetStep(Point{r, c})
-				if step == math.MaxInt {
-					fmt.Printf("%2d", -1)
-				} else {
-					fmt.Printf("%2d", grid.GetStep(Point{r, c}))
-				}
-			} else {
-				fmt.Printf("%2d", 0)
-			}
-		}
-		fmt.Println()
-	}
-}
-
-func dump(grid *Grid) {
-	dumpMatrix(grid)
-	fmt.Println()
-	dumpHeightMap(grid)
-	fmt.Println()
-	dumpSteps(grid)
-}
-
 type Queue struct {
-	q []Point
+	q []common.Point
 }
 
 func NewQueue() *Queue {
-	return &Queue{[]Point{}}
+	return &Queue{[]common.Point{}}
 }
 
-func (q *Queue) Enqueue(p Point) {
+func (q *Queue) Enqueue(p common.Point) {
 	q.q = append(q.q, p)
 }
 
-func (q *Queue) Pop() Point {
+func (q *Queue) Pop() common.Point {
 	p := q.q[0]
 	q.q = q.q[1:]
 	return p
@@ -257,7 +200,7 @@ func (q *Queue) Empty() bool {
 	return len(q.q) == 0
 }
 
-func shortestPath(grid *Grid, start, end Point) int {
+func shortestPath(grid *Grid, start, end common.Point) int {
 	grid.SetStep(start, 0)
 
 	frontier := NewQueue()
@@ -276,43 +219,19 @@ func shortestPath(grid *Grid, start, end Point) int {
 	return grid.GetStep(end)
 }
 
-func part1(input string) int {
-	grid := readInput(input)
+func (d *Day12) Part1() any {
+	grid := readInput(d.input)
 	start, end := grid.start, grid.end
 	grid.Reset()
 	return shortestPath(grid, start, end)
 }
 
-func part2(input string) int {
-	grid := readInput(input)
+func (d *Day12) Part2() any {
+	grid := readInput(d.input)
 	end := grid.end
 	n := math.MaxInt
 	for _, start := range grid.StartingPoints() {
 		n = min(n, shortestPath(grid, start, end))
 	}
 	return n
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `Sabqponm
-	abcryxxl
-	accszExk
-	acctuvwj
-	abdefghi`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 12, Part 1: %v\n", part1(input))
-	fmt.Printf("2022 Day 12, Part 2: %v\n", part2(input))
 }

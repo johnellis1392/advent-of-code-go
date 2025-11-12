@@ -1,12 +1,36 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
+
+type Day07 struct {
+	input []Hand
+}
+
+func (d *Day07) Year() string {
+	return "2023"
+}
+
+func (d *Day07) Day() string {
+	return "07"
+}
+
+func (d *Day07) Parse(input string) error {
+	var hands []Hand
+	for _, line := range strings.Split(input, "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
+		hands = append(hands, NewHand(line))
+	}
+	d.input = hands
+
+	return nil
+}
 
 type Hand struct {
 	cards    string
@@ -34,13 +58,6 @@ func (h Hand) Less(other Hand) bool {
 		}
 	}
 	return false
-}
-
-func first(cards map[string]int) int {
-	for _, v := range cards {
-		return v
-	}
-	return -1
 }
 
 // Part 1 Implementation
@@ -101,11 +118,7 @@ func CalcStrength(hand string) int {
 			numJacks++
 		} else {
 			c := string(hand[i])
-			if _, found := cards[c]; found {
-				cards[c] += 1
-			} else {
-				cards[c] = 1
-			}
+			cards[c] += 1
 		}
 	}
 
@@ -181,24 +194,6 @@ func NewHand(input string) Hand {
 	}
 }
 
-func readInput(input string) []Hand {
-	var hands []Hand
-	for _, line := range strings.Split(input, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-		hands = append(hands, NewHand(line))
-	}
-	return hands
-}
-
-func dump(hands []Hand) {
-	for _, hand := range hands {
-		fmt.Println(hand.String())
-	}
-}
-
 func group(hands []Hand) [][]Hand {
 	res := make([][]Hand, 7)
 	for _, hand := range hands {
@@ -208,8 +203,8 @@ func group(hands []Hand) [][]Hand {
 	return res
 }
 
-func part1(input string) int {
-	hands := readInput(input)
+func (d *Day07) Part1() any {
+	hands := d.input
 	groups := group(hands)
 
 	res := 0
@@ -229,8 +224,8 @@ func part1(input string) int {
 	return res
 }
 
-func part2(input string) int {
-	hands := readInput(input)
+func (d *Day07) Part2() any {
+	hands := d.input
 	groups := group(hands)
 
 	res := 0
@@ -248,28 +243,4 @@ func part2(input string) int {
 	}
 
 	return res
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `32T3K 765
-	T55J5 684
-	KK677 28
-	KTJJT 220
-	QQQJA 483`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 7, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 7, Part 2: %v\n", part2(input))
 }

@@ -1,17 +1,32 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
 
-func part1(input string) int {
+type Day01 struct {
+	input string
+}
+
+func (d *Day01) Year() string {
+	return "2022"
+}
+
+func (d *Day01) Day() string {
+	return "01"
+}
+
+func (d *Day01) Parse(input string) error {
+	d.input = strings.TrimSpace(input)
+	return nil
+}
+
+func (d *Day01) Part1() any {
 	res := 0
 	sum := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			res = max(res, sum)
@@ -30,10 +45,10 @@ func part1(input string) int {
 	return res
 }
 
-func part2(input string) int {
+func (d *Day01) Part2() any {
 	var sums []int
 	sum := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			sums = append(sums, sum)
@@ -59,36 +74,4 @@ func part2(input string) int {
 		sum += sums[i]
 	}
 	return sum
-}
-
-func main() {
-	filename := "input.txt"
-	test_input := `1000
-	2000
-	3000
-	
-	4000
-	
-	5000
-	6000
-	
-	7000
-	8000
-	9000
-	
-	10000`
-	var input string
-	const DEBUG = false
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 1, part 1: %v\n", part1(input))
-	fmt.Printf("2022 Day 1, part 2: %v\n", part2(input))
 }

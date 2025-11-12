@@ -1,14 +1,26 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-func readInput(input string) ([]int, []int) {
+type Day06 struct {
+	input     string
+	times     []int
+	distances []int
+}
+
+func (d *Day06) Year() string {
+	return "2023"
+}
+
+func (d *Day06) Day() string {
+	return "06"
+}
+
+func (d *Day06) Parse(input string) error {
 	re := regexp.MustCompile("[0-9]+")
 	lines := strings.Split(input, "\n")
 	timeStrings := re.FindAllString(strings.TrimSpace(strings.TrimPrefix(lines[0], "Time:")), -1)
@@ -23,11 +35,14 @@ func readInput(input string) ([]int, []int) {
 		distances = append(distances, distance)
 	}
 
-	return times, distances
+	d.times = times
+	d.distances = distances
+
+	return nil
 }
 
-func part1(input string) int {
-	times, distances := readInput(input)
+func (d *Day06) Part1() any {
+	times, distances := d.times, d.distances
 	res := 1
 	for i := 0; i < len(times); i++ {
 		time, distance := times[i], distances[i]
@@ -67,8 +82,8 @@ func readInput2(input string) (int, int) {
 	return time, distance
 }
 
-func part2(input string) int {
-	time, distance := readInput2(input)
+func (d *Day06) Part2() any {
+	time, distance := readInput2(d.input)
 	n := 0
 	for t := 1; t < time; t++ {
 		speed := t
@@ -79,25 +94,4 @@ func part2(input string) int {
 		}
 	}
 	return n
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `Time:      7  15   30
-	Distance:  9  40  200`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("Day 6, Part 1: %v\n", part1(input))
-	fmt.Printf("Day 6, Part 2: %v\n", part2(input))
 }

@@ -1,11 +1,40 @@
-package main
+package aoc2023
 
 import (
 	"fmt"
 	"math"
-	"os"
 	"strings"
 )
+
+type Day10 struct {
+	input *Grid
+}
+
+func (d *Day10) Year() string {
+	return "2023"
+}
+
+func (d *Day10) Day() string {
+	return "10"
+}
+
+func (d *Day10) Parse(input string) error {
+	var matrix [][]string
+	for _, line := range strings.Split(input, "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
+		var row []string
+		for i := 0; i < len(line); i++ {
+			row = append(row, string(line[i]))
+		}
+		matrix = append(matrix, row)
+	}
+	d.input = NewGrid(matrix)
+
+	return nil
+}
 
 type Point struct {
 	r, c int
@@ -215,22 +244,6 @@ outer:
 	return grid
 }
 
-func readInput(input string) *Grid {
-	var matrix [][]string
-	for _, line := range strings.Split(input, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-		var row []string
-		for i := 0; i < len(line); i++ {
-			row = append(row, string(line[i]))
-		}
-		matrix = append(matrix, row)
-	}
-	return NewGrid(matrix)
-}
-
 type Queue struct {
 	vs []Point
 }
@@ -341,8 +354,8 @@ func (s *Set) ForEach(f func(p Point)) {
 	}
 }
 
-func part1(input string) int {
-	grid := readInput(input)
+func (d *Day10) Part1() any {
+	grid := d.input
 	frontier := NewQueue()
 	frontier.Enqueue(grid.start)
 
@@ -463,8 +476,8 @@ func replaceStart(grid *Grid) {
 	grid.matrix[p.r][p.c] = s
 }
 
-func part2(input string) int {
-	grid := readInput(input)
+func (d *Day10) Part2() any {
+	grid := d.input
 	walls := getWalls(grid)
 	tiles := getTiles(grid, walls)
 	replaceStart(grid)
@@ -479,41 +492,4 @@ func part2(input string) int {
 	})
 
 	return sum
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input :=
-		`.....
-	   .S-7.
-	   .|.|.
-	   .L-J.
-	   .....`
-
-	// test_input =
-	// 	`FF7FSF7F7F7F7F7F---7
-	// 	 L|LJ||||||||||||F--J
-	// 	 FL-7LJLJ||||||LJL-77
-	// 	 F--JF--7||LJLJ7F7FJ-
-	// 	 L---JF-JLJ.||-FJLJJ7
-	// 	 |F|F-JF---7F7-L7L|7|
-	// 	 |FFJF7L7F-JF7|JL---7
-	// 	 7-L-JL7||F7|L7F-7F7|
-	// 	 L.L7LFJ|||||FJL7||LJ
-	// 	 L7JLJL-JLJLJL--JLJ.L`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 10, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 10, Part 2: %v\n", part2(input))
 }

@@ -1,17 +1,33 @@
-package main
+package aoc2023
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 )
 
-func part1(input string) int {
+type Day01 struct {
+	input string
+}
+
+func (d *Day01) Year() string {
+	return "2023"
+}
+
+func (d *Day01) Day() string {
+	return "01"
+}
+
+func (d *Day01) Parse(input string) error {
+	d.input = input
+	return nil
+}
+
+func (d *Day01) Part1() any {
 	sum := 0
 	re := regexp.MustCompile(`[^0-9]+`)
 
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		numbers := re.ReplaceAllString(line, "")
 		if len(numbers) == 0 {
 			continue
@@ -46,9 +62,9 @@ func replace(input string) string {
 	return s
 }
 
-func part2(input string) int {
+func (d *Day01) Part2() any {
 	sum := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		if len(line) == 0 {
 			continue
 		}
@@ -59,31 +75,4 @@ func part2(input string) int {
 	}
 
 	return sum
-}
-
-func main() {
-	// test_input := `1abc2
-	// pqr3stu8vwx
-	// a1b2c3d4e5f
-	// treb7uchet`
-
-	input, err := os.ReadFile("./input.txt")
-	if err != nil {
-		panic(err)
-	}
-
-	// fmt.Printf("part1 = %v\n", part1(test_input))
-	fmt.Printf("part1 = %v\n", part1(string(input)))
-
-	// test_input2 := `two1nine
-	// eightwothree
-	// abcone2threexyz
-	// xtwone3four
-	// 4nineeightseven2
-	// zoneight234
-	// 7pqrstsixteen`
-	// fmt.Printf("part2 = %v\n", part2(test_input2))
-
-	// 54878: Too Low
-	fmt.Printf("part2 = %v\n", part2(string(input)))
 }

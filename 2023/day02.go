@@ -1,21 +1,23 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-type Game struct {
-	id    int
-	rolls [][]struct {
-		n     int
-		color string
-	}
+type Day02 struct {
+	input []Game
 }
 
-func readInput(input string) []Game {
+func (d *Day02) Year() string {
+	return "2023"
+}
+
+func (d *Day02) Day() string {
+	return "02"
+}
+
+func (d *Day02) Parse(input string) error {
 	var games []Game
 	for _, line := range strings.Split(input, "\n") {
 		line = strings.TrimSpace(line)
@@ -24,8 +26,7 @@ func readInput(input string) []Game {
 		}
 		var game Game
 
-		var parts []string
-		parts = strings.Split(line, ":")
+		parts := strings.Split(line, ":")
 		id, _ := strings.CutPrefix(parts[0], "Game ")
 		idn, err := strconv.Atoi(id)
 		if err != nil {
@@ -67,27 +68,21 @@ func readInput(input string) []Game {
 		game.rolls = rolls
 		games = append(games, game)
 	}
-	return games
+	d.input = games
+
+	return nil
 }
 
-func dumpGame(game Game) {
-	fmt.Printf("Game %d: ", game.id)
-	for i, r := range game.rolls {
-		if i != 0 {
-			fmt.Printf("; ")
-		}
-		for j, s := range r {
-			if j != 0 {
-				fmt.Printf(", ")
-			}
-			fmt.Printf("%d %s", s.n, s.color)
-		}
+type Game struct {
+	id    int
+	rolls [][]struct {
+		n     int
+		color string
 	}
-	fmt.Println()
 }
 
-func part1(input string) int {
-	games := readInput(input)
+func (d *Day02) Part1() any {
+	games := d.input
 
 	total_reds := 12
 	total_greens := 13
@@ -121,8 +116,8 @@ outer:
 	return sum
 }
 
-func part2(input string) int {
-	games := readInput(input)
+func (d *Day02) Part2() any {
+	games := d.input
 	sum := 0
 
 	for _, game := range games {
@@ -143,28 +138,4 @@ func part2(input string) int {
 	}
 
 	return sum
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-	Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
-	Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
-	Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
-	Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023, Day 2, part 1: %v\n", part1(input))
-	fmt.Printf("2023, Day 2, part 2: %v\n", part2(input))
 }

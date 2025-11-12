@@ -1,22 +1,27 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
+
+	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
-type Point struct {
-	x, y int
+type Day09 struct {
+	input string
 }
 
-func abs(x int) int {
-	if x < 0 {
-		return x * -1
-	} else {
-		return x
-	}
+func (d *Day09) Year() string {
+	return "2022"
+}
+
+func (d *Day09) Day() string {
+	return "09"
+}
+
+func (d *Day09) Parse(input string) error {
+	d.input = input
+	return nil
 }
 
 func normalize(x int) int {
@@ -29,15 +34,15 @@ func normalize(x int) int {
 	}
 }
 
-func part1(input string) int {
-	head := Point{0, 0}
-	tail := Point{0, 0}
-	lastPos := Point{0, 0}
+func (d *Day09) Part1() any {
+	head := common.Point{X: 0, Y: 0}
+	tail := common.Point{X: 0, Y: 0}
+	var lastPos common.Point
 
-	steps := make(map[Point]bool)
+	steps := make(map[common.Point]bool)
 	steps[tail] = true
 
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue
@@ -61,9 +66,9 @@ func part1(input string) int {
 
 		for i := 0; i < n; i++ {
 			lastPos = head
-			head.x += dx
-			head.y += dy
-			if abs(head.x-tail.x) > 1 || abs(head.y-tail.y) > 1 {
+			head.X += dx
+			head.Y += dy
+			if abs(head.X-tail.X) > 1 || abs(head.Y-tail.Y) > 1 {
 				tail = lastPos
 				if _, ok := steps[tail]; !ok {
 					steps[tail] = true
@@ -75,54 +80,53 @@ func part1(input string) int {
 	return len(steps)
 }
 
-func dump(head Point, knots []Point, steps map[Point]bool, x1, y1, x2, y2 int) {
-	w, h := x2-x1+2, y2-y1+2
-	graph := make([][]string, h)
-	for i := 0; i < h; i++ {
-		graph[i] = make([]string, w)
-	}
+// func dump(head Point, knots []Point, steps map[Point]bool, x1, y1, x2, y2 int) {
+// 	w, h := x2-x1+2, y2-y1+2
+// 	graph := make([][]string, h)
+// 	for i := 0; i < h; i++ {
+// 		graph[i] = make([]string, w)
+// 	}
 
-	for r := 0; r < h; r++ {
-		for c := 0; c < w; c++ {
-			graph[r][c] = "."
-		}
-	}
+// 	for r := 0; r < h; r++ {
+// 		for c := 0; c < w; c++ {
+// 			graph[r][c] = "."
+// 		}
+// 	}
 
-	for step, _ := range steps {
-		x, y := step.x-x1+1, step.y-y1+1
-		graph[y][x] = "#"
-	}
+// 	for step, _ := range steps {
+// 		x, y := step.x-x1+1, step.y-y1+1
+// 		graph[y][x] = "#"
+// 	}
 
-	graph[-y1+1][-x1+1] = "s"
+// 	graph[-y1+1][-x1+1] = "s"
 
-	for i := len(knots) - 1; i >= 0; i-- {
-		point := knots[i]
-		x, y := point.x-x1+1, point.y-y1+1
-		graph[y][x] = fmt.Sprintf("%d", i+1)
-	}
+// 	for i := len(knots) - 1; i >= 0; i-- {
+// 		point := knots[i]
+// 		x, y := point.x-x1+1, point.y-y1+1
+// 		graph[y][x] = fmt.Sprintf("%d", i+1)
+// 	}
 
-	graph[head.y-y1+1][head.x-x1+1] = "H"
+// 	graph[head.y-y1+1][head.x-x1+1] = "H"
 
-	for r := h - 1; r >= 0; r-- {
-		for c := 0; c < w; c++ {
-			fmt.Printf("%s", graph[r][c])
-		}
-		fmt.Println()
-	}
-}
+// 	for r := h - 1; r >= 0; r-- {
+// 		for c := 0; c < w; c++ {
+// 			fmt.Printf("%s", graph[r][c])
+// 		}
+// 		fmt.Println()
+// 	}
+// }
 
-func part2(input string) int {
+func (d *Day09) Part2() any {
 	x1, y1, x2, y2 := 0, 0, 0, 0
-	head := Point{0, 0}
-	knots := make([]Point, 9)
+	head := common.Point{X: 0, Y: 0}
+	knots := make([]common.Point, 9)
 	for i := 0; i < 9; i++ {
-		knots[i] = Point{0, 0}
+		knots[i] = common.Point{X: 0, Y: 0}
 	}
-	// lastHeadPos := Point{0, 0}
-	steps := make(map[Point]bool)
+	steps := make(map[common.Point]bool)
 	steps[head] = true
 
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue
@@ -145,21 +149,19 @@ func part2(input string) int {
 		}
 
 		for i := 0; i < n; i++ {
-			// lastHeadPos = head
-			head.x += dx
-			head.y += dy
-			// lastPos := lastHeadPos
+			head.X += dx
+			head.Y += dy
 			curr := head
 
 			for j := 0; j < 9; j++ {
-				if abs(curr.x-knots[j].x) <= 1 && abs(curr.y-knots[j].y) <= 1 {
+				if abs(curr.X-knots[j].X) <= 1 && abs(curr.Y-knots[j].Y) <= 1 {
 					break
 				}
 
-				ddx, ddy := curr.x-knots[j].x, curr.y-knots[j].y
+				ddx, ddy := curr.X-knots[j].X, curr.Y-knots[j].Y
 				ddx, ddy = normalize(ddx), normalize(ddy)
-				knots[j].x += ddx
-				knots[j].y += ddy
+				knots[j].X += ddx
+				knots[j].Y += ddy
 
 				curr = knots[j]
 			}
@@ -168,49 +170,12 @@ func part2(input string) int {
 				steps[knots[9-1]] = true
 			}
 
-			x1 = min(x1, head.x)
-			x2 = max(x2, head.x)
-			y1 = min(y1, head.y)
-			y2 = max(y2, head.y)
+			x1 = min(x1, head.X)
+			x2 = max(x2, head.X)
+			y1 = min(y1, head.Y)
+			y2 = max(y2, head.Y)
 		}
 	}
 
-	// dump(head, knots, steps, x1, y1, x2, y2)
 	return len(steps)
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	// test_input := `R 4
-	// U 4
-	// L 3
-	// D 1
-	// R 4
-	// D 1
-	// L 5
-	// R 2`
-	test_input := `R 5
-	U 8
-	L 8
-	D 3
-	R 17
-	D 10
-	L 25
-	U 20`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 9, part 1: %v\n", part1(input))
-	// 5012 too high
-	fmt.Printf("2022 Day 9, part 2: %v\n", part2(input))
 }

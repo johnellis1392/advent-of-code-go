@@ -1,12 +1,28 @@
-package main
+package aoc2022
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
+
+type Day13 struct {
+	input string
+}
+
+func (d *Day13) Year() string {
+	return "2022"
+}
+
+func (d *Day13) Day() string {
+	return "13"
+}
+
+func (d *Day13) Parse(input string) error {
+	d.input = input
+	return nil
+}
 
 type Tree interface {
 	IsLeaf() bool
@@ -157,14 +173,6 @@ func readSequences(input string) []Tree {
 	return res
 }
 
-func dump(pairs []Pair) {
-	for _, pair := range pairs {
-		fmt.Println(pair.left.String())
-		fmt.Println(pair.right.String())
-		fmt.Println()
-	}
-}
-
 func compareValues(left, right int) int {
 	switch {
 	case left < right:
@@ -209,8 +217,8 @@ func compare(left, right Tree) int {
 	}
 }
 
-func part1(input string) int {
-	pairs := readPairs(input)
+func (d *Day13) Part1() any {
+	pairs := readPairs(d.input)
 	sum := 0
 	for i, pair := range pairs {
 		if compare(pair.left, pair.right) >= 0 {
@@ -220,14 +228,8 @@ func part1(input string) int {
 	return sum
 }
 
-func dumpSequences(sequences []Tree) {
-	for _, t := range sequences {
-		fmt.Println(t)
-	}
-}
-
-func part2(input string) int {
-	sequences := readSequences(input)
+func (d *Day13) Part2() any {
+	sequences := readSequences(d.input)
 	key1 := parse("[[2]]")
 	key2 := parse("[[6]]")
 	sequences = append(sequences, key1)
@@ -236,7 +238,6 @@ func part2(input string) int {
 		s1, s2 := sequences[i], sequences[j]
 		return compare(s1, s2) >= 0
 	})
-	// dumpSequences(sequences)
 
 	res := 1
 	for i, sequence := range sequences {
@@ -246,46 +247,4 @@ func part2(input string) int {
 		}
 	}
 	return res
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `[1,1,3,1,1]
-	[1,1,5,1,1]
-	
-	[[1],[2,3,4]]
-	[[1],4]
-	
-	[9]
-	[[8,7,6]]
-	
-	[[4,4],4,4]
-	[[4,4],4,4,4]
-	
-	[7,7,7,7]
-	[7,7,7]
-	
-	[]
-	[3]
-	
-	[[[]]]
-	[[]]
-	
-	[1,[2,[3,[4,[5,6,7]]]],8,9]
-	[1,[2,[3,[4,[5,6,0]]]],8,9]`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 13, Part 1: %v\n", part1(input))
-	fmt.Printf("2022 Day 13, Part 2: %v\n", part2(input))
 }

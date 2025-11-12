@@ -1,11 +1,35 @@
-package main
+package aoc2023
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
+
+type Day03 struct {
+	input [][]byte
+}
+
+func (d *Day03) Year() string {
+	return "2023"
+}
+
+func (d *Day03) Day() string {
+	return "03"
+}
+
+func (d *Day03) Parse(input string) error {
+	var matrix [][]byte
+	for _, line := range strings.Split(input, "\n") {
+		if len(line) == 0 {
+			continue
+		}
+		line = strings.TrimSpace(line)
+		matrix = append(matrix, []byte(line))
+	}
+	d.input = matrix
+
+	return nil
+}
 
 func isDigit(matrix [][]byte, r, c int) bool {
 	if r < 0 || c < 0 {
@@ -62,18 +86,6 @@ func isPartNumber(matrix [][]byte, r, c int) bool {
 	return false
 }
 
-func readInput(input string) [][]byte {
-	var matrix [][]byte
-	for _, line := range strings.Split(input, "\n") {
-		if len(line) == 0 {
-			continue
-		}
-		line = strings.TrimSpace(line)
-		matrix = append(matrix, []byte(line))
-	}
-	return matrix
-}
-
 func getNumFromMatrix(matrix [][]byte, r, c int) int {
 	s := ""
 	for i := c; i < len(matrix[r]) && isDigit(matrix, r, i); i++ {
@@ -87,9 +99,9 @@ func getNumFromMatrix(matrix [][]byte, r, c int) int {
 	}
 }
 
-func part1(input string) int {
+func (d *Day03) Part1() any {
 	sum := 0
-	matrix := readInput(input)
+	matrix := d.input
 	for r := 0; r < len(matrix); r++ {
 		var c int = 0
 		for c < len(matrix[r]) {
@@ -212,9 +224,9 @@ func getGearRatio(matrix [][]byte, r, c int) int {
 	return res
 }
 
-func part2(input string) int {
+func (d *Day03) Part2() any {
 	sum := 0
-	matrix := readInput(input)
+	matrix := d.input
 	for r := 0; r < len(matrix); r++ {
 		for c := 0; c < len(matrix[r]); c++ {
 			if isGear(matrix, r, c) {
@@ -223,33 +235,4 @@ func part2(input string) int {
 		}
 	}
 	return sum
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input :=
-		`467..114..
-		 ...*......
-		 ..35..633.
-		 ......#...
-		 617*......
-		 .....+.58.
-		 ..592.....
-		 ......755.
-		 ...$.*....
-		 .664.598..`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-	fmt.Printf("2023, Day 3, part 1: %v\n", part1(input))
-	fmt.Printf("2023, Day 3, part 2: %v\n", part2(input))
 }

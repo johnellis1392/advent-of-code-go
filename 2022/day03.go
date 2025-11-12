@@ -1,8 +1,6 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"strings"
 )
 
@@ -14,9 +12,26 @@ func priority(c byte) int {
 	}
 }
 
-func part1(input string) int {
+type Day03 struct {
+	input string
+}
+
+func (d *Day03) Year() string {
+	return "2022"
+}
+
+func (d *Day03) Day() string {
+	return "03"
+}
+
+func (d *Day03) Parse(input string) error {
+	d.input = strings.TrimSpace(input)
+	return nil
+}
+
+func (d *Day03) Part1() any {
 	sum := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue
@@ -55,8 +70,8 @@ func intersection(s1, s2 string) string {
 	return res
 }
 
-func part2(input string) int {
-	lines := strings.Split(input, "\n")
+func (d *Day03) Part2() any {
+	lines := strings.Split(d.input, "\n")
 	sum := 0
 
 	for i := 0; i < len(lines); i += 3 {
@@ -67,29 +82,4 @@ func part2(input string) int {
 	}
 
 	return sum
-}
-
-func main() {
-	filename := "input.txt"
-	const DEBUG = false
-	test_input := `vJrwpWtwJgWrhcsFMMfFFhFp
-	jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
-	PmmdzqPrVvPwwTWBwg
-	wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
-	ttgJtRGJQctTZtZT
-	CrZsJsPPZsGzwwsLwLmpwMDw`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022, Day 3, part 1: %v\n", part1(input))
-	fmt.Printf("2022, Day 3, part 2: %v\n", part2(input))
 }

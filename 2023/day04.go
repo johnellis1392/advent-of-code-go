@@ -1,12 +1,53 @@
-package main
+package aoc2023
 
 import (
 	"fmt"
 	"math"
-	"os"
 	"regexp"
 	"strings"
 )
+
+type Day04 struct {
+	input []Card
+}
+
+func (d *Day04) Year() string {
+	return "2023"
+}
+
+func (d *Day04) Day() string {
+	return "04"
+}
+
+func (d *Day04) Parse(input string) error {
+	var res []Card
+	re := regexp.MustCompile("[0-9]+")
+
+	for _, line := range strings.Split(input, "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
+
+		var parts []string
+		parts = strings.Split(line, ":")
+		id := strings.TrimPrefix(parts[0], "Card ")
+
+		parts = strings.Split(parts[1], " | ")
+		winning := re.FindAllString(parts[0], -1)
+		holding := re.FindAllString(parts[1], -1)
+
+		res = append(res, Card{
+			id:      id,
+			winning: winning,
+			holding: holding,
+		})
+	}
+
+	d.input = res
+
+	return nil
+}
 
 type Card struct {
 	id      string
@@ -55,36 +96,8 @@ func dumpCards(cards []Card) {
 	}
 }
 
-func readInput(input string) []Card {
-	var res []Card
-	re := regexp.MustCompile("[0-9]+")
-
-	for _, line := range strings.Split(input, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-
-		var parts []string
-		parts = strings.Split(line, ":")
-		id := strings.TrimPrefix(parts[0], "Card ")
-
-		parts = strings.Split(parts[1], " | ")
-		winning := re.FindAllString(parts[0], -1)
-		holding := re.FindAllString(parts[1], -1)
-
-		res = append(res, Card{
-			id:      id,
-			winning: winning,
-			holding: holding,
-		})
-	}
-
-	return res
-}
-
-func part1(input string) int {
-	cards := readInput(input)
+func (d *Day04) Part1() any {
+	cards := d.input
 	res := 0
 
 	for _, card := range cards {
@@ -103,8 +116,8 @@ func dumpTotals(cardTotals []int) {
 	}
 }
 
-func part2(input string) int {
-	cards := readInput(input)
+func (d *Day04) Part2() any {
+	cards := d.input
 	cardTotals := make([]int, len(cards))
 	for i := 0; i < len(cardTotals); i++ {
 		cardTotals[i] = 1
@@ -123,31 +136,5 @@ func part2(input string) int {
 		res += total
 	}
 
-	// dumpTotals(cardTotals)
 	return res
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
-	Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
-	Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
-	Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
-	Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
-	Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2023 Day 4, Part 1: %v\n", part1(input))
-	fmt.Printf("2023 Day 4, Part 2: %v\n", part2(input))
 }

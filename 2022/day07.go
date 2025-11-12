@@ -1,58 +1,24 @@
-package main
+package aoc2022
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-type Dir struct {
-	name     string
-	size     int
-	children map[string]Dir
-	parent   *Dir
+type Day07 struct {
+	root Dir
 }
 
-func (dir *Dir) getSize() int {
-	s := 0
-	s += dir.size
-	for _, child := range dir.children {
-		s += child.getSize()
-	}
-	return s
+func (d *Day07) Year() string {
+	return "2022"
 }
 
-func (dir *Dir) isLeaf() bool {
-	return len(dir.children) == 0
+func (d *Day07) Day() string {
+	return "07"
 }
 
-func (dir *Dir) calcSizes(max int) int {
-	res := 0
-	if dir.isLeaf() {
-		return 0
-	}
-	// fmt.Printf("- calc size: '%s'\n", dir.name)
-	if dir.getSize() <= max {
-		res += dir.getSize()
-	}
-	for _, child := range dir.children {
-		res += child.calcSizes(max)
-	}
-	return res
-}
-
-func (dir *Dir) dumps(indent int) {
-	for i := 0; i < indent; i++ {
-		fmt.Printf(" ")
-	}
-	fmt.Printf("- %s (%d)\n", dir.name, dir.getSize())
-	for _, child := range dir.children {
-		child.dumps(indent + 2)
-	}
-}
-
-func readInput(input string) Dir {
+func (d *Day07) Parse(input string) error {
 	lines := strings.Split(input, "\n")
 	i := 0
 	root := Dir{name: "/", size: 0, parent: nil, children: make(map[string]Dir)}
@@ -105,23 +71,67 @@ outer:
 			}
 		}
 	}
-	return root
+	d.root = root
+	return nil
 }
 
-func part1(input string) int {
-	root := readInput(input)
+type Dir struct {
+	name     string
+	size     int
+	children map[string]Dir
+	parent   *Dir
+}
+
+func (dir *Dir) getSize() int {
+	s := 0
+	s += dir.size
+	for _, child := range dir.children {
+		s += child.getSize()
+	}
+	return s
+}
+
+func (dir *Dir) isLeaf() bool {
+	return len(dir.children) == 0
+}
+
+func (dir *Dir) calcSizes(max int) int {
+	res := 0
+	if dir.isLeaf() {
+		return 0
+	}
+	if dir.getSize() <= max {
+		res += dir.getSize()
+	}
+	for _, child := range dir.children {
+		res += child.calcSizes(max)
+	}
+	return res
+}
+
+func (dir *Dir) dumps(indent int) {
+	for i := 0; i < indent; i++ {
+		fmt.Printf(" ")
+	}
+	fmt.Printf("- %s (%d)\n", dir.name, dir.getSize())
+	for _, child := range dir.children {
+		child.dumps(indent + 2)
+	}
+}
+
+func (d *Day07) Part1() any {
+	root := d.root
 	const MAX = 100000
 	res := root.calcSizes(MAX)
 	return res
 }
 
-func part2(input string) int {
-	root := readInput(input)
+func (d *Day07) Part2() any {
+	root := d.root
 	const MAX = 70000000
 	const MIN = 30000000
 	freeSpace := MAX - root.getSize()
 	spaceNeeded := MIN - freeSpace
-	// fmt.Printf("Space Needed: %d\n", spaceNeeded)
 	res := root.getSize()
 	var f func(*Dir)
 	f = func(d *Dir) {
@@ -140,46 +150,4 @@ func part2(input string) int {
 	}
 	f(&root)
 	return res
-}
-
-func main() {
-	const DEBUG = true
-	filename := "input.txt"
-	test_input := `$ cd /
-	$ ls
-	dir a
-	14848514 b.txt
-	8504156 c.dat
-	dir d
-	$ cd a
-	$ ls
-	dir e
-	29116 f
-	2557 g
-	62596 h.lst
-	$ cd e
-	$ ls
-	584 i
-	$ cd ..
-	$ cd ..
-	$ cd d
-	$ ls
-	4060174 j
-	8033020 d.log
-	5626152 d.ext
-	7214296 k`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022, Day 7, part 1: %v\n", part1(input))
-	fmt.Printf("2022, Day 7, part 2: %v\n", part2(input))
 }

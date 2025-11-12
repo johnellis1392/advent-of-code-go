@@ -1,12 +1,22 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"strings"
 )
 
-func readInput(input string) [][]int {
+type Day08 struct {
+	input [][]int
+}
+
+func (d *Day08) Year() string {
+	return "2022"
+}
+
+func (d *Day08) Day() string {
+	return "08"
+}
+
+func (d *Day08) Parse(input string) error {
 	lines := strings.Split(input, "\n")
 	var res [][]int
 	for _, line := range lines {
@@ -20,7 +30,8 @@ func readInput(input string) [][]int {
 		}
 		res = append(res, a)
 	}
-	return res
+	d.input = res
+	return nil
 }
 
 func copy(a [][]int) [][]int {
@@ -45,8 +56,8 @@ func newBoolArr(r, c int) [][]bool {
 	return res
 }
 
-func part1(input string) int {
-	a := readInput(input)
+func (d *Day08) Part1() any {
+	a := d.input
 	m, n := len(a), len(a[0])
 
 	var max int
@@ -156,8 +167,8 @@ func scenicScore(a [][]int, r, c int) int {
 	return left * right * top * bottom
 }
 
-func part2(input string) int {
-	a := readInput(input)
+func (d *Day08) Part2() any {
+	a := d.input
 	res := 0
 	for r := 0; r < len(a); r++ {
 		for c := 0; c < len(a[r]); c++ {
@@ -168,28 +179,4 @@ func part2(input string) int {
 		}
 	}
 	return res
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input := `30373
-	25512
-	65332
-	33549
-	35390`
-
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022 Day 8, part 1: %v\n", part1(input))
-	fmt.Printf("2022 Day 8, part 2: %v\n", part2(input))
 }

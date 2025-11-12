@@ -1,15 +1,30 @@
-package main
+package aoc2022
 
 import (
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-func part1(input string) int {
+type Day04 struct {
+	input string
+}
+
+func (d *Day04) Year() string {
+	return "2022"
+}
+
+func (d *Day04) Day() string {
+	return "04"
+}
+
+func (d *Day04) Parse(input string) error {
+	d.input = input
+	return nil
+}
+
+func (d *Day04) Part1() any {
 	res := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		assignments := strings.Split(line, ",")
 		a1, a2 := strings.Split(assignments[0], "-"), strings.Split(assignments[1], "-")
@@ -26,9 +41,9 @@ func part1(input string) int {
 	return res
 }
 
-func part2(input string) int {
+func (d *Day04) Part2() any {
 	res := 0
-	for _, line := range strings.Split(input, "\n") {
+	for _, line := range strings.Split(d.input, "\n") {
 		line = strings.TrimSpace(line)
 		as := strings.Split(line, ",")
 		p1, p2 := strings.Split(as[0], "-"), strings.Split(as[1], "-")
@@ -43,29 +58,4 @@ func part2(input string) int {
 		}
 	}
 	return res
-}
-
-func main() {
-	const DEBUG = false
-	filename := "input.txt"
-	test_input :=
-		`2-4,6-8
-	   2-3,4-5
-	   5-7,7-9
-	   2-8,3-7
-	   6-6,4-6
-	   2-6,4-8`
-	var input string
-	if DEBUG {
-		input = test_input
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-	}
-
-	fmt.Printf("2022, Day 3, part 1: %v\n", part1(input))
-	fmt.Printf("2022, Day 3, part 2: %v\n", part2(input))
 }

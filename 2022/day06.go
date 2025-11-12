@@ -1,16 +1,28 @@
-package main
+package aoc2022
 
-import (
-	"fmt"
-	"os"
-)
+type Day06 struct {
+	input string
+}
 
-func part1(input string) int {
+func (d *Day06) Year() string {
+	return "2022"
+}
+
+func (d *Day06) Day() string {
+	return "06"
+}
+
+func (d *Day06) Parse(input string) error {
+	d.input = input
+	return nil
+}
+
+func (d *Day06) Part1() any {
 outer:
-	for i := 4; i < len(input); i++ {
+	for i := 4; i < len(d.input); i++ {
 		for j := i - 4; j < i-1; j++ {
 			for k := j + 1; k < i; k++ {
-				if input[j] == input[k] {
+				if d.input[j] == d.input[k] {
 					continue outer
 				}
 			}
@@ -20,13 +32,13 @@ outer:
 	return -1
 }
 
-func part2(input string) int {
+func (d *Day06) Part2() any {
 	const n = 14
 outer:
-	for i := n; i < len(input); i++ {
+	for i := n; i < len(d.input); i++ {
 		for j := i - n; j < i-1; j++ {
 			for k := j + 1; k < i; k++ {
-				if input[j] == input[k] {
+				if d.input[j] == d.input[k] {
 					continue outer
 				}
 			}
@@ -34,37 +46,4 @@ outer:
 		return i
 	}
 	return -1
-}
-
-var tests []string = []string{
-	"mjqjpqmgbljsphdztnvjfqwrcgsmlb",
-	"bvwbjplbgvbhsrlpgdmjqwftvncz",
-	"nppdvjthqldpwncqszvftbrmjlhg",
-	"nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg",
-	"zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw",
-}
-
-func main() {
-	const DEBUG = true
-	filename := "input.txt"
-	var input string
-	if DEBUG {
-		fmt.Println("Part 1:")
-		for _, test := range tests {
-			fmt.Printf("%s = %d\n", test, part1(test))
-		}
-		fmt.Println("\nPart 2:")
-		for _, test := range tests {
-			fmt.Printf("%s = %d\n", test, part2(test))
-		}
-	} else {
-		s, err := os.ReadFile(filename)
-		if err != nil {
-			panic(err)
-		}
-		input = string(s)
-
-		fmt.Printf("2022, Day 6, part 1: %v\n", part1(input))
-		fmt.Printf("2022, Day 6, part 2: %v\n", part2(input))
-	}
 }
