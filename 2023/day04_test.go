@@ -14,7 +14,7 @@ func TestDay04_Part1(t *testing.T) {
 	Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
 	Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 	Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`
-	expected := 0
+	expected := 13
 	day := new(aoc.Day04)
 	util.TestPart1(t, day, input, expected)
 }

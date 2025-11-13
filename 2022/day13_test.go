@@ -32,7 +32,7 @@ func TestDay13_Part1(t *testing.T) {
 	[1,[2,[3,[4,[5,6,7]]]],8,9]
 	[1,[2,[3,[4,[5,6,0]]]],8,9]`
 
-	expected := 0
+	expected := 13
 	day := new(aoc2022.Day13)
 	util.TestPart1(t, day, input, expected)
 }

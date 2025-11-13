@@ -20,14 +20,28 @@ import (
 // 	 L7JLJL-JLJLJL--JLJ.L`
 
 func TestDay10_Part1(t *testing.T) {
-	input :=
-		`.....
+	day := new(aoc.Day10)
+
+	t.Run("Part 1, Test 1", func(t *testing.T) {
+		input :=
+			`.....
 	   .S-7.
 	   .|.|.
 	   .L-J.
 	   .....`
 
-	expected := 0
-	day := new(aoc.Day10)
-	util.TestPart1(t, day, input, expected)
+		expected := 4
+		util.TestPart1(t, day, input, expected)
+	})
+
+	t.Run("Part 1, Test 2", func(t *testing.T) {
+		input :=
+			`..F7.
+.FJ|.
+SJ.L7
+|F--J
+LJ...`
+		expected := 8
+		util.TestPart1(t, day, input, expected)
+	})
 }

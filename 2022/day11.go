@@ -173,13 +173,6 @@ func (m *Monkey) Receive(v uint64) {
 	m.items = append(m.items, v)
 }
 
-// func dump(monkies []Monkey) {
-// 	for _, monkey := range monkies {
-// 		fmt.Println(monkey.String())
-// 		fmt.Println()
-// 	}
-// }
-
 func (d *Day11) Part1() any {
 	monkies := d.input
 	var divisor uint64 = 1

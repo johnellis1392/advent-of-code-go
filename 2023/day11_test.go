@@ -19,6 +19,6 @@ func TestDay11_Part1(t *testing.T) {
 	..........
 	.......#..
 	#...#.....`
-	expected := 0
+	expected := 374
 	tu.TestPart1(t, d, input, expected)
 }

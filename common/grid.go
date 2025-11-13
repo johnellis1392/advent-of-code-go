@@ -25,8 +25,8 @@ func NewGrid(rows, cols int) *Grid {
 }
 
 func NewGridFromPoints(start, end Point) *Grid {
-	rows := end.R() - start.R()
-	cols := end.C() - start.C()
+	rows := end.R() - start.R() + 1
+	cols := end.C() - start.C() + 1
 	return &Grid{
 		Width:  cols,
 		Height: rows,
@@ -48,11 +48,11 @@ func (g *Grid) Get(p Point) *string {
 	if !g.Contains(p) {
 		return nil
 	}
-	return &g.matrix[p.R()][p.C()]
+	return &g.matrix[p.R()-g.Start.R()][p.C()-g.Start.C()]
 }
 
 func (g *Grid) Set(p Point, v string) {
 	if g.Contains(p) {
-		g.matrix[p.R()][p.C()] = v
+		g.matrix[p.R()-g.Start.R()][p.C()-g.Start.C()] = v
 	}
 }

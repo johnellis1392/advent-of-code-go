@@ -14,7 +14,7 @@ func TestDay08_Part1(t *testing.T) {
 	33549
 	35390`
 
-	expected := 0
+	expected := 21
 	day := new(aoc2022.Day08)
 	util.TestPart1(t, day, input, expected)
 }

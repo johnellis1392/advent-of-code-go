@@ -17,7 +17,7 @@ move 1 from 2 to 1
 move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2`
-	expected := 0
+	expected := "CMZ"
 	day := new(aoc2022.Day05)
 	util.TestPart1(t, day, input, expected)
 }
