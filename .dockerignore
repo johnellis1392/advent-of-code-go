@@ -1,0 +1,8 @@
+.vscode
+advent-of-code-go
+input
+.gitignore
+Dockerfile
+.dockerignore
+Makefile
+**/*_test.go
