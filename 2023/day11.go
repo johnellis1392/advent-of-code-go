@@ -7,8 +7,31 @@ import (
 )
 
 type Day11 struct {
-	grid     *common.Grid
 	galaxies []common.Point
+	nullRows []bool
+	nullCols []bool
+	width    int
+	height   int
+}
+
+func (d *Day11) Galaxies() []common.Point {
+	return d.galaxies
+}
+
+func (d *Day11) NullRows() []bool {
+	return d.nullRows
+}
+
+func (d *Day11) NullCols() []bool {
+	return d.nullCols
+}
+
+func (d *Day11) Width() int {
+	return d.width
+}
+
+func (d *Day11) Height() int {
+	return d.height
 }
 
 func (d *Day11) Year() string {
@@ -19,94 +42,103 @@ func (d *Day11) Day() string {
 	return "11"
 }
 
-func makeNullRow(width int) []string {
-	row := make([]string, width)
-	for i := 0; i < width; i++ {
-		row[i] = "."
-	}
-	return row
-}
-
 func (d *Day11) Parse(input string) error {
-	var ss [][]string
-	for _, line := range strings.Split(input, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-		var row []string
-		for i := 0; i < len(line); i++ {
-			row = append(row, string(line[i]))
-		}
-		ss = append(ss, row)
+	input = strings.TrimSpace(input)
+	lines := strings.Split(input, "\n")
+	height, width := len(lines), len(lines[0])
+
+	nullRows := make([]bool, height)
+	for i := range nullRows {
+		nullRows[i] = true
 	}
 
-	w, h := len(ss[0]), len(ss)
+	nullCols := make([]bool, width)
+	for i := range nullCols {
+		nullCols[i] = true
+	}
 
-	// Check Rows
-	nullRows := make(map[int]bool)
-	nullCols := make(map[int]bool)
 	var galaxies []common.Point
-	for r := 0; r < h; r++ {
-		for c := 0; c < w; c++ {
-			if ss[r][c] == "#" {
-				nullRows[r] = true
-				nullCols[c] = true
-				galaxies = append(galaxies, common.PointFromRC(r, c))
+	for row, line := range lines {
+		line = strings.TrimSpace(line)
+		for col, c := range line {
+			if c == '#' {
+				// Found a Galaxy
+				nullRows[row] = false
+				nullCols[col] = false
+				galaxies = append(galaxies, common.PointFromRC(row, col))
 			}
 		}
-	}
-
-	newWidth := w + len(nullCols)*2
-	var matrix [][]string
-	for r := 0; r < h; r++ {
-		if _, isNullRow := nullRows[r]; isNullRow {
-			matrix = append(matrix, makeNullRow(newWidth))
-			matrix = append(matrix, makeNullRow(newWidth))
-			continue
-		}
-		var row []string
-		for c := 0; c < w; c++ {
-			if _, isNullCol := nullCols[c]; isNullCol {
-				row = append(row, ".", ".")
-				continue
-			}
-			row = append(row, ss[r][c])
-		}
-		matrix = append(matrix, row)
 	}
 
 	d.galaxies = galaxies
-	d.grid = nil // TODO: Fix this
-
+	d.nullRows = nullRows
+	d.nullCols = nullCols
+	d.width = width
+	d.height = height
 	return nil
 }
 
-func shortestPathSize(from, to common.Point) int {
-	res := 0
-	current := from
-	for current != to {
-		res++
-		dr := to.R() - current.R()
-		dc := to.C() - current.C()
-		if common.Abs(dr) > common.Abs(dc) {
-			current = common.PointFromRC(current.R()+common.Mag(dr), current.C())
+func min(i, j int) int {
+	if i < j {
+		return i
+	}
+	return j
+}
+
+func max(i, j int) int {
+	if i > j {
+		return i
+	}
+	return j
+}
+
+// We just need to calculate the Manhattan distance and get the
+// number of steps with the additional null-space increment.
+func (d *Day11) PathLength(i, j int, nullSpaceSize int) uint64 {
+	start, end := d.galaxies[i], d.galaxies[j]
+	var path uint64 = 0
+	for row := min(start.Y, end.Y) + 1; row <= max(start.Y, end.Y); row++ {
+		if d.nullRows[row] {
+			path += uint64(nullSpaceSize)
 		} else {
-			current = common.PointFromRC(current.R(), current.C()+common.Mag(dc))
+			path += 1
 		}
 	}
-	return res
+
+	for col := min(start.X, end.X) + 1; col <= max(start.X, end.X); col++ {
+		if d.nullCols[col] {
+			path += uint64(nullSpaceSize)
+		} else {
+			path += 1
+		}
+	}
+
+	return path
 }
 
 func (d *Day11) Part1() any {
-	sum := 0
-	for i := 0; i < len(d.galaxies)-1; i++ {
+	const nullSpaceSize = 2
+	paths := make([][]uint64, len(d.galaxies))
+	for i := 0; i < len(d.galaxies); i++ {
+		paths[i] = make([]uint64, len(d.galaxies))
+	}
+	for i := 0; i < len(d.galaxies); i++ {
+		paths[i][i] = 0
 		for j := i + 1; j < len(d.galaxies); j++ {
-			a, b := d.galaxies[i], d.galaxies[j]
-			sum += shortestPathSize(a, b)
+			l := d.PathLength(i, j, nullSpaceSize)
+			paths[i][j] = l
+			paths[j][i] = l
 		}
 	}
-	return sum
+
+	var res uint64 = 0
+	for i := 0; i < len(d.galaxies)-1; i++ {
+		for j := i + 1; j < len(d.galaxies); j++ {
+			res += paths[i][j]
+		}
+	}
+
+	return res
 }
 
 func (d *Day11) Part2() any {
