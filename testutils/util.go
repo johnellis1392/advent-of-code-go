@@ -21,3 +21,27 @@ func TestPart2(t *testing.T, day common.Day, input string, expected any) {
 		t.Errorf("part2: expected %v, got %v", expected, actual)
 	}
 }
+
+func AssertEquals(t *testing.T, expected, actual any) {
+	if e, ok := expected.(common.Base); ok {
+		if !e.Equals(actual) {
+			t.Errorf("Expected %v, but found %v", e.String(), actual)
+		}
+	} else {
+		if expected != actual {
+			t.Errorf("Expected %v, but found %v", expected, actual)
+		}
+	}
+}
+
+func AssertTrue(t *testing.T, v bool) {
+	AssertEquals(t, true, v)
+}
+
+func AssertFalse(t *testing.T, v bool) {
+	AssertEquals(t, false, v)
+}
+
+func AssertNil(t *testing.T, v any) {
+	AssertEquals(t, nil, v)
+}
