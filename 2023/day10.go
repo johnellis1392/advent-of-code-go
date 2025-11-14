@@ -243,94 +243,6 @@ func NewQueue() *Queue {
 	return &Queue{[]common.Point{}}
 }
 
-type Set struct {
-	vs map[common.Point]bool
-}
-
-func NewSet() *Set {
-	return &Set{make(map[common.Point]bool)}
-}
-
-func (s *Set) First() common.Point {
-	for p := range s.vs {
-		return p
-	}
-	return common.PointFromRC(-1, -1)
-}
-
-func (s *Set) Add(p common.Point) {
-	s.vs[p] = true
-}
-
-func (s *Set) Remove(p common.Point) {
-	delete(s.vs, p)
-}
-
-func (s *Set) Contains(p common.Point) bool {
-	_, ok := s.vs[p]
-	return ok
-}
-
-func (s *Set) Diff(o *Set) (res *Set) {
-	res = NewSet()
-	s.ForEach(func(p common.Point) {
-		if !o.Contains(p) {
-			res.Add(p)
-		}
-	})
-	return res
-}
-
-func (s *Set) Union(o *Set) (res *Set) {
-	res = NewSet()
-	s.ForEach(func(p common.Point) {
-		res.Add(p)
-	})
-	o.ForEach(func(p common.Point) {
-		res.Add(p)
-	})
-	return res
-}
-
-func (s *Set) Xor(o *Set) (res *Set) {
-	res = NewSet()
-	s.ForEach(func(p common.Point) {
-		if !o.Contains(p) {
-			res.Add(p)
-		}
-	})
-	o.ForEach(func(p common.Point) {
-		if !s.Contains(p) {
-			res.Add(p)
-		}
-	})
-	return res
-}
-
-func (s *Set) Intersect(o *Set) (res *Set) {
-	res = NewSet()
-	s.ForEach(func(p common.Point) {
-		if o.Contains(p) {
-			res.Add(p)
-		}
-	})
-	return res
-}
-
-func (s *Set) Size() int {
-	return len(s.vs)
-}
-
-func (s *Set) Overlaps(o *Set) bool {
-	return s.Intersect(o).Size() > 0
-}
-
-func (s *Set) ForEach(f func(p common.Point)) {
-	for p := range s.vs {
-		f(p)
-	}
-}
-
 func (d *Day10) Part1() any {
 	grid := d.input
 	frontier := NewQueue()
@@ -351,10 +263,10 @@ func (d *Day10) Part1() any {
 	return res
 }
 
-func getWalls(grid *Grid) *Set {
+func getWalls(grid *Grid) *common.Set {
 	frontier := NewQueue()
 	frontier.Enqueue(grid.start)
-	walls := NewSet()
+	walls := common.NewSet()
 
 	for !frontier.Empty() {
 		currentPos := frontier.Pop()
@@ -369,9 +281,9 @@ func getWalls(grid *Grid) *Set {
 	return walls
 }
 
-func getTiles(grid *Grid, walls *Set) *Set {
+func getTiles(grid *Grid, walls *common.Set) *common.Set {
 	w, h := grid.Size()
-	tiles := NewSet()
+	tiles := common.NewSet()
 	for r := 0; r < h; r++ {
 		for c := 0; c < w; c++ {
 			p := common.PointFromRC(r, c)
@@ -383,7 +295,7 @@ func getTiles(grid *Grid, walls *Set) *Set {
 	return tiles
 }
 
-func contained(grid *Grid, walls *Set, p common.Point) bool {
+func contained(grid *Grid, walls *common.Set, p common.Point) bool {
 	res := 0
 
 	_, h := grid.Size()
@@ -460,8 +372,9 @@ func (d *Day10) Part2() any {
 	replaceStart(grid)
 
 	sum := 0
-	containedPoints := NewSet()
-	tiles.ForEach(func(p common.Point) {
+	containedPoints := common.NewSet()
+	tiles.ForEach(func(v any) {
+		p := v.(common.Point)
 		if contained(grid, walls, p) {
 			sum++
 			containedPoints.Add(p)

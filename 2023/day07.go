@@ -36,22 +36,19 @@ type Hand struct {
 	cards    string
 	bid      int
 	values   []int
-	strength int
+	handType int
 }
 
 func (h Hand) String() string {
 	return h.cards + " bid: " + strconv.Itoa(h.bid)
 }
 
-func (h Hand) Strength() int {
-	return h.strength
-}
-
-func (h Hand) HighCard() int {
-	return h.values[0]
-}
-
 func (h Hand) Less(other Hand) bool {
+	if h.handType < other.handType {
+		return true
+	} else if h.handType > other.handType {
+		return false
+	}
 	for i := 0; i < len(h.values); i++ {
 		if h.values[i] != other.values[i] {
 			return h.values[i] < other.values[i]
@@ -60,87 +57,48 @@ func (h Hand) Less(other Hand) bool {
 	return false
 }
 
-// Part 1 Implementation
-// func CalcStrength(hand string) int {
-// 	cards := make(map[string]int)
-// 	for i := 0; i < len(hand); i++ {
-// 		c := string(hand[i])
-// 		if _, found := cards[c]; found {
-// 			cards[c] += 1
-// 		} else {
-// 			cards[c] = 1
-// 		}
-// 	}
-// 	n := len(cards)
-// 	switch {
-// 	case n == 1: // Five of a Kind
-// 		return 6
-// 	case n == 2:
-// 		if i := first(cards); i == 4 || i == 1 { // Four of a Kind
-// 			return 5
-// 		} else { // Full House
-// 			return 4
-// 		}
-// 	case n == 3:
-// 		rank := 0
-// 		for _, i := range cards {
-// 			if i == 3 { // Three of a Kind
-// 				rank = 3
-// 				break
-// 			} else if i == 2 { // Two Pair
-// 				rank = 2
-// 				break
-// 			} else {
-// 				continue
-// 			}
-// 		}
-// 		return rank
-// 	case n == 4: // One Pair
-// 		return 1
-// 	default: // High Card
-// 		return 0
-// 	}
-// }
+const FIVE_OF_A_KIND = 6
+const FOUR_OF_A_KIND = 5
+const FULL_HOUSE = 4
+const THREE_OF_A_KIND = 3
+const TWO_PAIR = 2
+const ONE_PAIR = 1
+const HIGH_CARD = 0
 
-func values(m map[string]int) []int {
-	var res []int
-	for _, val := range m {
-		res = append(res, val)
-	}
-	return res
-}
-
-func CalcStrength(hand string) int {
-	numJacks := 0
-	cards := make(map[string]int)
-	for i := 0; i < len(hand); i++ {
-		if hand[i] == 'J' {
-			numJacks++
+func CalcHandType(cards []int) int {
+	// Calculate number of like-cards
+	groups := make(map[int]int)
+	for i := 0; i < len(cards); i++ {
+		if v, ok := groups[cards[i]]; ok {
+			groups[cards[i]] = v + 1
 		} else {
-			c := string(hand[i])
-			cards[c] += 1
+			groups[cards[i]] = 1
 		}
 	}
 
-	vs := values(cards)
-	sort.Slice(vs, func(i, j int) bool { return vs[i] > vs[j] })
+	// Get number of cards per value, and sort descending
+	var values []int
+	for _, v := range groups {
+		values = append(values, v)
+	}
+	sort.Slice(values, func(i, j int) bool { return values[i] > values[j] })
+
+	// Determine the type of hand by the number of cards
 	switch {
-	case numJacks == 5: // All Jacks
-		return 6
-	case vs[0]+numJacks == 5: // Five of a Kind
-		return 6
-	case vs[0]+numJacks == 4: // Four of a Kind
-		return 5
-	case vs[0]+numJacks == 3 && vs[1] == 2: // Full House
-		return 4
-	case vs[0]+numJacks == 3 && vs[1] == 1: // Three of a Kind
-		return 3
-	case vs[0]+numJacks == 2 && vs[1] == 2: // Two Pair
-		return 2
-	case vs[0]+numJacks == 2 && vs[1] == 1: // One Pair
-		return 1
+	case values[0] == 5: // Five of a Kind
+		return FIVE_OF_A_KIND
+	case values[0] == 4: // Four of a Kind
+		return FOUR_OF_A_KIND
+	case values[0] == 3 && values[1] == 2: // Full House
+		return FULL_HOUSE
+	case values[0] == 3 && values[1] == 1: // Three of a Kind
+		return THREE_OF_A_KIND
+	case values[0] == 2 && values[1] == 2: // Two Pair
+		return TWO_PAIR
+	case values[0] == 2 && values[1] == 1: // One Pair
+		return ONE_PAIR
 	default: // High Card
-		return 0
+		return HIGH_CARD
 	}
 }
 
@@ -190,57 +148,22 @@ func NewHand(input string) Hand {
 		cards:    parts[0],
 		bid:      bid,
 		values:   values,
-		strength: CalcStrength(parts[0]),
+		handType: CalcHandType(values),
 	}
-}
-
-func group(hands []Hand) [][]Hand {
-	res := make([][]Hand, 7)
-	for _, hand := range hands {
-		s := hand.Strength()
-		res[s] = append(res[s], hand)
-	}
-	return res
 }
 
 func (d *Day07) Part1() any {
 	hands := d.input
-	groups := group(hands)
-
+	sort.Slice(hands, func(i, j int) bool {
+		return hands[i].Less(hands[j])
+	})
 	res := 0
-	rank := 1
-	for i := 0; i < 7; i++ {
-		group := groups[i]
-		sort.Slice(group, func(i, j int) bool {
-			return group[i].Less(group[j])
-		})
-
-		for _, hand := range group {
-			res += rank * hand.bid
-			rank++
-		}
+	for i, h := range hands {
+		res += (i + 1) * h.bid
 	}
-
 	return res
 }
 
 func (d *Day07) Part2() any {
-	hands := d.input
-	groups := group(hands)
-
-	res := 0
-	rank := 1
-	for i := 0; i < 7; i++ {
-		group := groups[i]
-		sort.Slice(group, func(i, j int) bool {
-			return group[i].Less(group[j])
-		})
-
-		for _, hand := range group {
-			res += rank * hand.bid
-			rank++
-		}
-	}
-
-	return res
+	return 0
 }

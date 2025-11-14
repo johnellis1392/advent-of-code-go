@@ -63,10 +63,7 @@ func (d *Direction) Reset() {
 
 func (d *Direction) Next() string {
 	dir := string(d.dirs[d.i])
-	d.i++
-	if d.i >= len(d.dirs) {
-		d.i = 0
-	}
+	d.i = (d.i + 1) % len(d.dirs)
 	return dir
 }
 
@@ -81,11 +78,11 @@ func (inst Inst) String() string {
 }
 
 func (inst Inst) IsStart() bool {
-	return inst.id[2] == 'A'
+	return inst.id == "AAA"
 }
 
 func (inst Inst) IsEnd() bool {
-	return inst.id[2] == 'Z'
+	return inst.id == "ZZZ"
 }
 
 func (d *Day08) Part1() any {
