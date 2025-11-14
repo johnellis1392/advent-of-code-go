@@ -1,5 +1,7 @@
 package testutils
 
+// Adds some missing assertions
+
 import (
 	"reflect"
 	"slices"
@@ -8,24 +10,12 @@ import (
 	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
-func TestPart1(t *testing.T, day common.Day, input string, expected any) {
-	day.Parse(input)
-	actual := day.Part1()
-	if actual != expected {
-		t.Errorf("part1: expected %v, got %v", expected, actual)
-	}
-}
-
-func TestPart2(t *testing.T, day common.Day, input string, expected any) {
-	day.Parse(input)
-	actual := day.Part2()
-	if actual != expected {
-		t.Errorf("part2: expected %v, got %v", expected, actual)
-	}
-}
-
 func AssertEquals(t *testing.T, expected, actual any) {
-	if e, ok := expected.(common.Base); ok {
+	if expected == nil {
+		if actual != nil {
+			t.Errorf("Expected nil, but found %v", actual)
+		}
+	} else if e, ok := expected.(common.Base); ok {
 		if !e.Equals(actual) {
 			t.Errorf("Expected %v, but found %v", e.String(), actual)
 		}
