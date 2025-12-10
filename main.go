@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 
+	aoc "github.com/johnellis1392/advent-of-code-go/2025"
 	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
@@ -282,14 +282,13 @@ func createRouter() *http.ServeMux {
 }
 
 func main() {
-	// d := new(aoc.Day01)
-	// sessionId := ""
-	// fmt.Println("Running...")
-	// RunDay(d, sessionId)
+	d := new(aoc.Day05)
+	sessionId := "53616c7465645f5f285e3c942c618f5086610566f5dc5087b6878389d7ff17d37d6f829d163607c66e84e640ac7e56903eace4f3502d568bf925b0c7bd7784e0"
+	fmt.Println("Running...")
+	RunDay(d, sessionId)
 
-	server := createRouter()
-
-	address := ":8080"
-	fmt.Printf("Listening on %s...\n", address)
-	log.Fatal(http.ListenAndServe(address, server))
+	// server := createRouter()
+	// address := ":8080"
+	// fmt.Printf("Listening on %s...\n", address)
+	// log.Fatal(http.ListenAndServe(address, server))
 }

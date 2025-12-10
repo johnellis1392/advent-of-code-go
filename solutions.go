@@ -11,6 +11,7 @@ import (
 	aoc2022 "github.com/johnellis1392/advent-of-code-go/2022"
 	aoc2023 "github.com/johnellis1392/advent-of-code-go/2023"
 	aoc2024 "github.com/johnellis1392/advent-of-code-go/2024"
+	aoc2025 "github.com/johnellis1392/advent-of-code-go/2025"
 	common "github.com/johnellis1392/advent-of-code-go/common"
 )
 
@@ -25,4 +26,5 @@ var Solutions = common.SolutionsByYear{
 	"2022": aoc2022.Solutions,
 	"2023": aoc2023.Solutions,
 	"2024": aoc2024.Solutions,
+	"2025": aoc2025.Solutions,
 }

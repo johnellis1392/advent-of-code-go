@@ -11,5 +11,6 @@ test:
 build: ./advent-of-code-go
 	@go build
 
-run: build
+run: build ./advent-of-code-go
+	@echo "Rebuilding..."
 	@./advent-of-code-go

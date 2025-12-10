@@ -1,4 +1,4 @@
-package aoc2024
+package aoc2025
 
 import common "github.com/johnellis1392/advent-of-code-go/common"
 
@@ -7,7 +7,7 @@ var Solutions = map[string]common.Day{
 	"02": nil,
 	"03": nil,
 	"04": nil,
-	"05": nil,
+	"05": &Day05{},
 	"06": nil,
 	"07": nil,
 	"08": nil,
